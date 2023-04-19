@@ -1254,8 +1254,9 @@ The following commands are available when any of the
 are enabled.
 
 #### DUMP_TMC
-`DUMP_TMC STEPPER=<name>`: This command will read the TMC driver
-registers and report their values.
+`DUMP_TMC STEPPER=<name> [REGISTER=<name>]`: This command will read all TMC
+driver registers and report their values. If a REGISTER is provided, only
+the specified register will be dumped.
 
 #### INIT_TMC
 `INIT_TMC STEPPER=<name>`: This command will initialize the TMC
@@ -1271,13 +1272,16 @@ if StealthChop2 is used, the stepper must be held at standstill for >130ms so
 that the driver executes the AT#1 calibration.
 
 #### SET_TMC_FIELD
-`SET_TMC_FIELD STEPPER=<name> FIELD=<field> VALUE=<value>`: This will
-alter the value of the specified register field of the TMC driver.
+`SET_TMC_FIELD STEPPER=<name> FIELD=<field> VALUE=<value> VELOCITY=<value>`:
+This will alter the value of the specified register field of the TMC driver.
 This command is intended for low-level diagnostics and debugging only
 because changing the fields during run-time can lead to undesired and
 potentially dangerous behavior of your printer. Permanent changes
 should be made using the printer configuration file instead. No sanity
 checks are performed for the given values.
+A VELOCITY can also be specified instead of a VALUE. This velocity is
+converted to the 20bit TSTEP based value representation. Only use the VELOCITY
+argument for fields that represent velocities.
 
 ### [toolhead]
 

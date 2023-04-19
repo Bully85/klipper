@@ -2473,6 +2473,29 @@ sensor_type: BME280
 #   above parameters.
 ```
 
+### AHT10 temperature sensor
+
+AHT10 two wire interface (I2C) environmental sensor.
+Note that these sensors are not intended for use with extruders and
+heater beds, but rather for monitoring ambient temperature (C) and
+relative humidity. See
+[sample-macros.cfg](../config/sample-macros.cfg) for a gcode_macro
+that may be used to report humidity in addition to temperature.
+
+```
+sensor_type: AHT10
+#i2c_address:
+#   Default is 56 (0x38). Some AHT10 sensors give the option to use
+#   57 (0x39) by moving a resistor.
+#i2c_mcu:
+#i2c_bus:
+#i2c_speed:
+#   See the "common I2C settings" section for a description of the
+#   above parameters.
+#aht10_report_time:
+#   Interval in seconds between readings. Default is 30, minimum is 5
+```
+
 ### HTU21D sensor
 
 HTU21D family two wire interface (I2C) environmental sensor. Note that
@@ -3508,6 +3531,7 @@ run_current:
 #driver_SEDN: 0
 #driver_SEIMIN: 0
 #driver_SFILT: 0
+#driver_SG4_ANGLE_OFFSET: 1
 #   Set the given register during the configuration of the TMC2240
 #   chip. This may be used to set custom motor parameters. The
 #   defaults for each parameter are next to the parameter name in the
@@ -3621,6 +3645,10 @@ run_current:
 #driver_SEDN: 0
 #driver_SEIMIN: 0
 #driver_SFILT: 0
+#driver_DRVSTRENGTH: 0
+#driver_BBMCLKS: 4
+#driver_BBMTIME: 0
+#driver_FILT_ISENSE: 0
 #   Set the given register during the configuration of the TMC5160
 #   chip. This may be used to set custom motor parameters. The
 #   defaults for each parameter are next to the parameter name in the
@@ -4606,20 +4634,20 @@ SPI bus.
 The following parameters are generally available for devices using an
 I2C bus.
 
-Note that Klipper's current micro-controller support for i2c is
-generally not tolerant to line noise. Unexpected errors on the i2c
+Note that Klipper's current micro-controller support for I2C is
+generally not tolerant to line noise. Unexpected errors on the I2C
 wires may result in Klipper raising a run-time error. Klipper's
 support for error recovery varies between each micro-controller type.
-It is generally recommended to only use i2c devices that are on the
+It is generally recommended to only use I2C devices that are on the
 same printed circuit board as the micro-controller.
 
 Most Klipper micro-controller implementations only support an
-`i2c_speed` of 100000. The Klipper "linux" micro-controller supports a
-400000 speed, but it must be
+`i2c_speed` of 100000 (*standard mode*, 100kbit/s). The Klipper "Linux"
+micro-controller supports a 400000 speed (*fast mode*, 400kbit/s), but it must be
 [set in the operating system](RPi_microcontroller.md#optional-enabling-i2c)
 and the `i2c_speed` parameter is otherwise ignored. The Klipper
-"rp2040" micro-controller supports a rate of 400000 via the
-`i2c_speed` parameter. All other Klipper micro-controllers use a
+"RP2040" micro-controller and ATmega AVR family support a rate of 400000
+via the `i2c_speed` parameter. All other Klipper micro-controllers use a
 100000 rate and ignore the `i2c_speed` parameter.
 
 ```
@@ -4637,5 +4665,5 @@ and the `i2c_speed` parameter is otherwise ignored. The Klipper
 #   The I2C speed (in Hz) to use when communicating with the device.
 #   The Klipper implementation on most micro-controllers is hard-coded
 #   to 100000 and changing this value has no effect. The default is
-#   100000.
+#   100000. Linux, RP2040 and ATmega support 400000.
 ```

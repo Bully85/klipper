@@ -168,6 +168,12 @@ The following information is available in the
   module. These settings may differ from the config file if a
   `SET_RETRACTION` command alters them.
 
+## gcode_button
+
+The following information is available in
+[gcode_button some_name](Config_Reference.md#gcode_button) objects:
+- `state`: The current button state returned as "PRESSED" or "RELEASED"
+
 ## gcode_macro
 
 The following information is available in
@@ -495,11 +501,11 @@ The following information is available in the `toolhead` object
 
 The following information is available in
 [dual_carriage](Config_Reference.md#dual_carriage)
-on a hybrid_corexy or hybrid_corexz robot
-- `mode`: The current mode. Possible values are: "FULL_CONTROL", "DUPLICATION",
-  "MIRRORED"
-- `active_carriage`: The current active carriage.
-Possible values are: "CARRIAGE_0", "CARRIAGE_1", "BOTH"
+on a cartesian, hybrid_corexy or hybrid_corexz robot
+- `carriage_0`: The mode of the carriage 0. Possible values are:
+  "INACTIVE" and "PRIMARY".
+- `carriage_1`: The mode of the carriage 1. Possible values are:
+  "INACTIVE", "PRIMARY", "COPY", and "MIRROR".
 
 ## virtual_sdcard
 

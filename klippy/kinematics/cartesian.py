@@ -19,7 +19,6 @@ class CartKinematics:
         ranges = [r.get_range() for r in self.rails]
         self.axes_min = toolhead.Coord(*[r[0] for r in ranges], e=0.)
         self.axes_max = toolhead.Coord(*[r[1] for r in ranges], e=0.)
-        # Check for dual carriage support
         self.dc_module = None
         if config.has_section('dual_carriage'):
             dc_config = config.getsection('dual_carriage')
@@ -30,39 +29,34 @@ class CartKinematics:
             self.rails[3].setup_itersolve('cartesian_stepper_alloc',
                                           dc_axis.encode())
             dc_rail_0 = idex_modes.DualCarriagesRail(
-                self.printer, self.rails[self.dual_carriage_axis],
-                axis=self.dual_carriage_axis, active=True,
-                stepper_alloc_active=('cartesian_stepper_alloc',
-                                      dc_axis.encode()),
-                )
+                    self.rails[0], axis=self.dual_carriage_axis, active=True)
             dc_rail_1 = idex_modes.DualCarriagesRail(
-                self.printer, self.rails[3],
-                axis=self.dual_carriage_axis, active=False,
-                stepper_alloc_active=('cartesian_stepper_alloc',
-                                      dc_axis.encode()),
-                stepper_alloc_reverse=('cartesian_reverse_stepper_alloc',
-                                       dc_axis.encode())
-                )
-            self.dc_module = idex_modes.DualCarriages(self.printer,
-                        dc_rail_0, dc_rail_1, axis=self.dual_carriage_axis)
+                    self.rails[3], axis=self.dual_carriage_axis, active=False)
+            self.dc_module = idex_modes.DualCarriages(
+                    dc_config, dc_rail_0, dc_rail_1,
+                    axis=self.dual_carriage_axis)
         for s in self.get_steppers():
             s.set_trapq(toolhead.get_trapq())
             toolhead.register_step_generator(s.generate_steps)
         self.printer.register_event_handler("stepper_enable:motor_off",
-                                                    self._motor_off)
+                                            self._motor_off)
         # Setup boundary checks
         max_velocity, max_accel = toolhead.get_max_velocity()
-        self.max_z_velocity = config.getfloat(
-            'max_z_velocity', max_velocity, above=0., maxval=max_velocity)
-        self.max_z_accel = config.getfloat(
-            'max_z_accel', max_accel, above=0., maxval=max_accel)
+        self.max_z_velocity = config.getfloat('max_z_velocity', max_velocity,
+                                              above=0., maxval=max_velocity)
+        self.max_z_accel = config.getfloat('max_z_accel', max_accel,
+                                           above=0., maxval=max_accel)
         self.limits = [(1.0, -1.0)] * 3
     def get_steppers(self):
         return [s for rail in self.rails for s in rail.get_steppers()]
     def calc_position(self, stepper_positions):
         return [stepper_positions[rail.get_name()] for rail in self.rails]
     def update_limits(self, i, range):
-        self.limits[i] = range
+        l, h = self.limits[i]
+        # Only update limits if this axis was already homed,
+        # otherwise leave in un-homed state.
+        if l <= h:
+            self.limits[i] = range
     def override_rail(self, i, rail):
         self.rails[i] = rail
     def set_position(self, newpos, homing_axes):
@@ -73,7 +67,8 @@ class CartKinematics:
     def note_z_not_homed(self):
         # Helper for Safe Z Home
         self.limits[2] = (1.0, -1.0)
-    def _home_axis(self, homing_state, axis, rail):
+    def home_axis(self, homing_state, axis, rail):
+        # Determine movement
         position_min, position_max = rail.get_range()
         hi = rail.get_homing_info()
         homepos = [None, None, None, None]
@@ -87,15 +82,10 @@ class CartKinematics:
         homing_state.home_rails([rail], forcepos, homepos)
     def home(self, homing_state):
         for axis in homing_state.get_axes():
-            if (self.dc_module is not None and axis == 0):
-                self.dc_module.save_idex_state()
-                for i in [0,1]:
-                    self.dc_module.toggle_active_dc_rail(i)
-                    self._home_axis(homing_state, axis,
-                                    self.rails[self.dual_carriage_axis])
-                self.dc_module.restore_idex_state()
+            if self.dc_module is not None and axis == self.dual_carriage_axis:
+                self.dc_module.home(homing_state)
             else:
-                self._home_axis(homing_state, axis, self.rails[axis])
+                self.home_axis(homing_state, axis, self.rails[axis])
     def _motor_off(self, print_time):
         self.limits = [(1.0, -1.0)] * 3
     def _check_endstops(self, move):

@@ -1654,6 +1654,27 @@ cs_pin:
 #   measurements.
 ```
 
+### [lis2dw]
+
+Support for LIS2DW accelerometers.
+
+```
+[lis2dw]
+cs_pin:
+#   The SPI enable pin for the sensor. This parameter must be provided.
+#spi_speed: 5000000
+#   The SPI speed (in hz) to use when communicating with the chip.
+#   The default is 5000000.
+#spi_bus:
+#spi_software_sclk_pin:
+#spi_software_mosi_pin:
+#spi_software_miso_pin:
+#   See the "common SPI settings" section for a description of the
+#   above parameters.
+#axes_map: x, y, z
+#   See the "adxl345" section for information on this parameter.
+```
+
 ### [mpu9250]
 
 Support for MPU-9250, MPU-9255, MPU-6515, MPU-6050, and MPU-6500
@@ -2059,10 +2080,9 @@ z_offset:
 
 ### [axis_twist_compensation]
 
-Axis twist dependent toolhead Z position adjustment. Compensate for vertical
-toolhead movement caused by the rotation of the toolhead about the X axis due to
-a twist. See the [Axis Twist Compensation Guide](X_Twist_Compensation.md) for
-more detailed information regarding symptoms, configuration and setup.
+A tool to compensate for inaccurate probe readings due to twist in X gantry. See
+the [Axis Twist Compensation Guide](Axis_Twist_Compensation.md) for more
+detailed information regarding symptoms, configuration and setup.
 
 ```
 [axis_twist_compensation]
@@ -2072,25 +2092,19 @@ more detailed information regarding symptoms, configuration and setup.
 #horizontal_move_z: 5
 #   The height (in mm) that the head should be commanded to move to
 #   just prior to starting a probe operation. The default is 5.
-start_x: 20
+calibrate_start_x: 20
 #   Defines the minimum X coordinate of the calibration
 #   This should be the X coordinate that positions the nozzle at the starting
 #   calibration position. This parameter must be provided.
-end_x: 200
+calibrate_end_x: 200
 #   Defines the maximum X coordinate of the calibration
 #   This should be the X coordinate that positions the nozzle at the ending
 #   calibration position. This parameter must be provided.
-y: 112.5
+calibrate_y: 112.5
 #   Defines the Y coordinate of the calibration
 #   This should be the Y coordinate that positions the nozzle during the
 #   calibration process. This parameter must be provided and is recommended to
 #   be near the center of the bed
-#type: multilinear
-#   Defines the type of correction to apply. The choices are 'linear' or
-#   'multilinear'. 'linear' uses a linear regression to fit a line with the
-#   calibration points. 'multilinear' will interpolate linearly between each
-#   pair of points. It is not necessary to redo a calibration after changing
-#   this setting.
 ```
 
 ## Additional stepper motors and extruders
@@ -2686,6 +2700,24 @@ serial_no:
 #   Interval in seconds between readings. Default is 3.0, with a minimum of 1.0
 #sensor_mcu:
 #   The micro-controller to read from. Must be the host_mcu
+```
+
+### Combined temperature sensor
+
+Combined temperature sensor is a virtual temperature sensor based on several other sensors. This sensor can be used with extruders, heater_generic and heater beds.
+
+```
+sensor_type: temperature_combined
+#sensor_list:
+#   Must be provided. List of sensors to combine to new "virtual"
+#   sensor.
+#   E.g. 'temperature_sensor sensor1,extruder,heater_bed'
+#combination_method:
+#   Must be provided. Combination method used for the sensor.
+#   Available options are 'max', 'min', 'mean'.
+#maximum_deviation:
+#   Must be provided. Maximum permissible deviation between the sensors
+#   to combine (e.g. 5 degrees). To disable it, use a large value (e.g. 999.9)
 ```
 
 ## Fans

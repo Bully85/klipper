@@ -194,13 +194,32 @@ config CLOCK_FREQ
 
 choice
     prompt "Communication interface"
-    config ATSAMD_USB
-        bool "USB"
-        depends on HAVE_SAMD_USB
+    config ATSAMD_USB_PA24_PA25
+        bool "USB (on PA24/PA25)"
         select USBSERIAL
-    config ATSAMD_SERIAL
-        bool "Serial"
-        depends on !MACH_SAMC21
+    config ATSAMD_SERIAL_SERCOM0
+        bool "Serial (on SERCOM0)"
+        select SERIAL
+    config ATSAMD_SERIAL_SERCOM1
+        bool "Serial (on SERCOM1)" if LOW_LEVEL_OPTIONS
+        select SERIAL
+    config ATSAMD_SERIAL_SERCOM2
+        bool "Serial (on SERCOM2)" if LOW_LEVEL_OPTIONS
+        select SERIAL
+    config ATSAMD_SERIAL_SERCOM3
+        bool "Serial (on SERCOM3)" if LOW_LEVEL_OPTIONS
+        select SERIAL
+    config ATSAMD_SERIAL_SERCOM4
+        bool "Serial (on SERCOM4)" if LOW_LEVEL_OPTIONS && (MACH_SAMD51 || MACH_SAMD21G18)
+        select SERIAL
+    config ATSAMD_SERIAL_SERCOM5
+        bool "Serial (on SERCOM5)" if LOW_LEVEL_OPTIONS && (MACH_SAMD51 || MACH_SAMD21G18)
+        select SERIAL
+    config ATSAMD_SERIAL_SERCOM6
+        bool "Serial (on SERCOM6)" if LOW_LEVEL_OPTIONS && (MACH_SAMD51N19 || MACH_SAMD51P20)
+        select SERIAL
+    config ATSAMD_SERIAL_SERCOM7
+        bool "Serial (on SERCOM7)" if LOW_LEVEL_OPTIONS && (MACH_SAMD51N19 || MACH_SAMD51P20)
         select SERIAL
     config ATSAMD_MMENU_CANBUS_PA23_PA22
         bool "CAN bus (on PA23/PA22)"
